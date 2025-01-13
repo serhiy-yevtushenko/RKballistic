@@ -1,0 +1,57 @@
+# Copyright 2024 David Bookstaber (https://github.com/dbookstaber)
+
+[build-system]
+requires = ["setuptools", "wheel", "tomli; python_version<'3.11'"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "RKballistic"
+version = "0.0.1a0"
+
+authors = [
+    { name="dbookstaber", email="bookstaber@gmail.com"}
+]
+description = "LGPL library for small arms ballistic calculations (Python 3)"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["py_ballisticcalc", "ballistics", "ballistic calculator", "python", "python3"]
+license = {file = "LICENSE"}
+classifiers = [
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+dependencies = ["typing_extensions>= 4.12.2", "tomli; python_version<'3.11'", "py_ballisticcalc~=2.1.0a"]
+
+[project.urls]
+"Homepage" = "https://github.com/dbookstaber/RKballistic"
+"Bug Reports" = "https://github.com/dbookstaber/RKballistic"
+"Source" = "https://github.com/dbookstaber/RKballistic"
+
+[tool.setuptools]
+py-modules = ['RKballistic']
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["RKballistic*"]
+exclude = ["tests*"]
+
+[project.optional-dependencies]
+dev = [
+    'jupyter',
+    'pylint',
+    'mypy',
+    'pytest',
+    'pytest-xdist',
+    'build',
+]
