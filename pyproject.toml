@@ -31,7 +31,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: Implementation :: CPython",
 ]
-dependencies = ["typing_extensions>= 4.12.2", "tomli; python_version<'3.11'", "py_ballisticcalc~=2.1.0a"]
+dependencies = ["typing_extensions>= 4.12.2", "tomli; python_version<'3.11'", "py_ballisticcalc~=2.1.0a2"]
 
 [project.urls]
 "Homepage" = "https://github.com/dbookstaber/RKballistic"
