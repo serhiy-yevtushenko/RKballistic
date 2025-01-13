@@ -1,0 +1,5 @@
+prune tests
+include py.typed
+include *.ipynb
+include LICENSE
+include README.md

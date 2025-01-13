@@ -1,0 +1,30 @@
+# Config template for py_ballisticcalc
+
+title = "standard py_ballisticcalc config template"
+version = "2.1.0a2"
+
+[pybc.preferred_units]
+angular = 'Degree'
+distance = 'Yard'
+velocity = 'FPS'
+pressure = 'InHg'
+temperature = 'Fahrenheit'
+diameter = 'Inch'
+length = 'Inch'
+weight = 'Grain'
+adjustment = 'Mil'
+drop = 'Inch'
+energy = 'FootPound'
+ogw = 'Pound'
+sight_height = 'Inch'
+target_height = 'Inch'
+twist = 'Inch'
+
+[pybc.calculator]
+max_calc_step_size = { value = 0.5, units = "Foot" }
+use_powder_sensitivity = false
+
+# # or use:
+# [pybc.calculator.max_calc_step_size]
+# value = 0.5
+# units = "Foot"
