@@ -30,8 +30,8 @@ from numpy.typing import NDArray
 Vector3D: TypeAlias = NDArray[np.float64]
 trajectory_dtype = np.dtype([
     ('time', np.float64),   # Time-of-flight in seconds
-    ('position', np.float64, (3,)),  # feet
-    ('velocity', np.float64, (3,)),  # feet/second
+    ('position', np.float64, (3,)),  # feet x=[0] downrange, y=[1] drop, z=[2] windage
+    ('velocity', np.float64, (3,)),  # fps  x=[0] downrange, y=[1] drop, z=[2] windage
     ('mach', np.float64),   # Mach number of |velocity|
     ('drag', np.float64)
 ])
@@ -102,9 +102,6 @@ class _WindSock:
 class RK4TrajectoryCalc(TrajectoryCalc):
     """Computes trajectory using Runge-Kutta 4th order method"""
 
-    # David TODO:
-    # - Compute fifth order error estimate
-    # - Optionally automate step size adjustment to maximize performance necessary for desired accuracy
     def _trajectory(self, shot_info: Shot, maximum_range: float, step: float,
                     filter_flags: Union[TrajFlag, int], time_step: float = 0.0) -> List[TrajectoryData]:
         """
@@ -114,8 +111,10 @@ class RK4TrajectoryCalc(TrajectoryCalc):
         :param filter_flags: Whether to record TrajectoryData for zero or Mach crossings
         """
         integrate_result = self.integrate(shot_info, maximum_range)
-        print(integrate_result)
-        #TODO: Handle TrajFlags for special rows
+        print(integrate_result)  # Why the integration stopped where it did.  (See RangeErrors)
+        #TODO: Handle TrajFlags for special rows.
+        # Perhaps better to do linear search instead of current interpolate_trajectory_at_x
+        #   binary search if we're looking for anything other than TrajFlag.RANGE or .NONE
         ranges: List[TrajectoryData] = []
         start = 0
         if filter_flags == TrajFlag.NONE: start = maximum_range
@@ -127,6 +126,9 @@ class RK4TrajectoryCalc(TrajectoryCalc):
 
     def interpolate_trajectory_at_x(self, target_x) -> TrajectoryData:
         """Interpolates the trajectory at a given x-coordinate.
+        This assumes that position.x is monotonically increasing.
+        TODO: Check for and handle violations of this assumption.
+
         Args:
             target_x: The x-coordinate at which to interpolate.
         Returns:
@@ -153,6 +155,8 @@ class RK4TrajectoryCalc(TrajectoryCalc):
         velocity_vector = np.array([np.interp(target_x, [lower_point['position'][0], upper_point['position'][0]], [lower_point['velocity'][i], upper_point['velocity'][i]]) for i in range(3)])
         velocity = np.linalg.norm(velocity_vector)
 
+        # TODO: Add spin-drift, Coriolis, and aerodynamic jump corrections if requested
+
         windage = range_vector[2] + self.spin_drift(time)
         drop_adjustment = get_correction(range_vector[0], range_vector[1])
         windage_adjustment = get_correction(range_vector[0], windage)
@@ -177,16 +181,20 @@ class RK4TrajectoryCalc(TrajectoryCalc):
             flag=TrajFlag.RANGE
         )
 
+    # TODO:
+    # - Compute fifth order error estimate
+    # - Optionally automate step size adjustment to maximize performance necessary for desired accuracy
     def integrate(self, shot_info: Shot, maximum_range: float) -> str:
         """Calculate trajectory for specified shot
         :return: Description (from RangeError) of what ended the trajectory
         """
         print("Running RK4 Calculator...", end="")
 
-        # TODO: temporary use direct access via classname, it's not recommended but I'll fix it
+        # Dmytro TODO: temporary use direct access via classname, it's not recommended but I'll fix it
         _cMinimumVelocity = self._TrajectoryCalc__config.cMinimumVelocity
         _cMaximumDrop = self._TrajectoryCalc__config.cMaximumDrop
         _cMinimumAltitude = self._TrajectoryCalc__config.cMinimumAltitude
+
         gravity_vector = np.array([0.0, -32.17405, 0.0], dtype=np.float64)
         maximum_drop = min(_cMaximumDrop, _cMinimumAltitude + self.alt0)
         global cInitTrajectoryPoints
@@ -206,7 +214,7 @@ class RK4TrajectoryCalc(TrajectoryCalc):
 
         # region Initialize velocity and position of projectile
         velocity = self.muzzle_velocity
-        # x: downrange distance, y: drop, z: windage
+        # Vectors [0]=x: downrange, [1]=y: drop, [2]=z: windage
         range_vector = np.array([.0,
                                   -self.cant_cosine * self.sight_height,
                                   -self.cant_sine * self.sight_height],
@@ -272,7 +280,10 @@ class RK4TrajectoryCalc(TrajectoryCalc):
             velocity = np.linalg.norm(velocity_vector)  # Velocity relative to ground
             # endregion
 
-        add_to_trajectory(time, range_vector, velocity_vector, mach, km, relative_speed)
+        # Add last point calculated
+        if time > 0:
+            add_to_trajectory(time, range_vector, velocity_vector, mach, km, relative_speed)
+
         self.trajectory_data = trajectory[:i]
 
         finish_reason = "Done"
