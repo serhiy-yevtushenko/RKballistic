@@ -10,13 +10,13 @@ name = "RKballistic"
 version = "0.0.1a1"
 
 authors = [
-    { name="dbookstaber", email="bookstaber@gmail.com"}
+    { name = "dbookstaber", email = "bookstaber@gmail.com" }
 ]
 description = "LGPL library for small arms ballistic calculations (Python 3)"
 readme = "README.md"
 requires-python = ">=3.9"
 keywords = ["py_ballisticcalc", "ballistics", "ballistic calculator", "python", "python3"]
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
@@ -31,7 +31,8 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: Implementation :: CPython",
 ]
-dependencies = ["typing_extensions>= 4.12.2", "tomli; python_version<'3.11'", "py_ballisticcalc~=2.1.0a6"]
+dependencies = ["typing_extensions>= 4.12.2", "tomli; python_version<'3.11'", "py_ballisticcalc~=2.1.0a6",
+    "scipy>=1.15.1"]
 
 [project.urls]
 "Homepage" = "https://github.com/dbookstaber/RKballistic"
